@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.conf import settings
 from uuid import uuid4
+
+from .validators import validate_file_size
 
 
 class Promotion(models.Model):
@@ -44,6 +46,16 @@ class Product(models.Model):
         ordering = ["title"]
 
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(
+        upload_to="store/images",
+        validators=[validate_file_size],
+    )
+
+
 class Customer(models.Model):
     MEMBERSHIP_BRONZE = "B"
     MEMBERSHIP_SILVER = "S"
@@ -74,9 +86,7 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ["user__first_name", "user__last_name"]
-        permissions = [
-            ("view_history", "Can view history"),
-        ]
+        permissions = [("view_history", "Can view history")]
 
 
 class Order(models.Model):
@@ -96,9 +106,7 @@ class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
 
     class Meta:
-        permissions = [
-            ("cancel_order", "can cancel order"),
-        ]
+        permissions = [("cancel_order", "Can cancel order")]
 
 
 class OrderItem(models.Model):
@@ -124,10 +132,10 @@ class Cart(models.Model):
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
-        unique_together = ["product", "cart"]
+        unique_together = [["cart", "product"]]
 
 
 class Review(models.Model):
