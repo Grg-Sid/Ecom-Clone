@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "djoser",
+    "silk",
     "playground",
     "debug_toolbar",
     "store",
@@ -52,7 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -61,6 +63,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE += [
+        "silk.middleware.SilkyMiddleware",
+    ]
 
 INTERNAL_IPS = [
     # ...
@@ -102,7 +109,7 @@ DATABASES = {
         "NAME": "storefront",
         "HOST": "localhost",
         "USER": "root",
-        "PASSWORD": "Yokohama@1",
+        "PASSWORD": "P@ssword",
     }
 }
 
@@ -183,3 +190,12 @@ DEFAULT_FROM_EMAIL = "admin@localhost"
 ADMINS = [
     ("Admin", "admin@localhost"),
 ]
+
+CELERY_BROKER_URL = "redis://localhost:6379/1"
+CELERY_BEAT_SCHEDULE = {
+    "notify_customer": {
+        "task": "playground.tasks.notify_customer",
+        "schedule": 5,
+        "args": ["hello world"],
+    }
+}
