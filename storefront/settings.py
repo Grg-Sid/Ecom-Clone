@@ -64,10 +64,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-if DEBUG:
-    MIDDLEWARE += [
-        "silk.middleware.SilkyMiddleware",
-    ]
+# if DEBUG:
+#     MIDDLEWARE += [
+#         "silk.middleware.SilkyMiddleware",
+#     ]
 
 INTERNAL_IPS = [
     # ...
@@ -197,5 +197,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "playground.tasks.notify_customer",
         "schedule": 5,
         "args": ["hello world"],
+    }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     }
 }
