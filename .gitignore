@@ -1,1 +1,4 @@
 *.pyc
+/media/
+/static/
+debug.log

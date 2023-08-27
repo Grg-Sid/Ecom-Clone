@@ -1,13 +1,17 @@
-from django.core.cache import cache
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from rest_framework.views import APIView
+import logging
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 class HelloView(APIView):
-    @method_decorator(cache_page(5 * 60))
     def get(self, request):
-        response = requests.get("https://httpbun.com/delay/2")
+        try:
+            logger.info("Calling httpbun.com/delay/2")
+            response = requests.get("https://httpbun.com/delay/2")
+            logger.info("Got response from httpbun.com/delay/2")
+        except requests.ConnectionError:
+            logger.critical("Could not connect to httpbun.com")
         return render(request, "hello.html", {"name": "data"})
